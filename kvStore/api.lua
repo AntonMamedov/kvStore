@@ -7,8 +7,11 @@ local http_router = require('http.router')
 local http_server = require('http.server')
 local json = require('json')
 
-
-local httpd = http_server.new('127.0.0.1', 80, {
+port = 80;
+if arg[1] then
+    port = tonumber(arg[1])
+end
+local httpd = http_server.new('127.0.0.1', port, {
     log_requests = true,
     log_errors = true
 })
@@ -32,7 +35,7 @@ router:route({method = 'GET', path = '/kv/.*'},
 router:route({method = 'DELETE', path = '/kv/.*'},
         function(request)
             local target = request['PATH_INFO']:split('/')[3]
-            if target == nil or not box.space.kv:delete{target}[1] then
+            if target == nil or not box.space.kv:delete{target} then
                 return{status = 404}
             else
                 return{status = 204}
