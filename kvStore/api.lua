@@ -8,10 +8,10 @@ local http_server = require('http.server')
 local json = require('json')
 
 port = 80;
-if arg[1] then
-    port = tonumber(arg[1])
+if arg[2] then
+    port = tonumber(arg[2])
 end
-local httpd = http_server.new('127.0.0.1', port, {
+local httpd = http_server.new(arg[1], port, {
     log_requests = true,
     log_errors = true
 })
