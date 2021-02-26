@@ -65,7 +65,7 @@ router:route({method = 'POST', path = '/kv'},
             else
                 local keyInserted = pcall(
                         function()
-                            box.space.kv:insert{body['key'], json.encode(body['value'])}
+                            box.space.kv:insert{tostring(body['key']), json.encode(body['value'])}
                         end
                 )
                 if keyInserted then
