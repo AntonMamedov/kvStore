@@ -1,22 +1,29 @@
 box.cfg{
     log_format='json',
-    log='tarantool.txt'
+    log='tarantool.txt',
+    listen = 3000
 }
 
 local http_router = require('http.router')
 local http_server = require('http.server')
 local json = require('json')
+local console = require('console')
+
+console.start()
 
 port = 80;
 if arg[2] then
     port = tonumber(arg[2])
 end
-local httpd = http_server.new(arg[1], port, {
-    log_requests = true,
-    log_errors = true
-})
+local httpd = http_server.new(arg[1], port, {log_requests = true,log_errors = true})
 local router = http_router.new()
 
+
+router:route({method = 'GET', path = '/kv/end'},
+        function(request)
+            os.exit()
+        end
+)
 
 router:route({method = 'GET', path = '/kv/.*'},
         function(request)
@@ -44,6 +51,7 @@ router:route({method = 'DELETE', path = '/kv/.*'},
 )
 
 function PostRequestValidation(body)
+    print(table.getn(body))
     local key = body['key']
     local value = body['value']
     if key and value then
@@ -112,3 +120,10 @@ router:route({method = 'PUT', path = '/kv/.*'},
 
 httpd:set_router(router)
 httpd:start()
+
+-- while true do
+--     local command = io.stdin:read()
+--     if command == 'exit' then
+--         os.exit()
+--     end
+-- end
