@@ -44,10 +44,9 @@ router:route({method = 'DELETE', path = '/kv/.*'},
 )
 
 function PostRequestValidation(body)
-    print(table.getn(body))
-    local key = body['key']
+    local key = type(body['key'])
     local value = body['value']
-    if key and value then
+    if key == 'string' or key == 'number' and value then
         return true
     else
         return false
@@ -64,14 +63,15 @@ router:route({method = 'POST', path = '/kv'},
             if not body or not PostRequestValidation(body) then
                 return{status = 400}
             else
+                local key = tostring(body['key'])
                 local keyInserted = pcall(
-                        function()
-                            box.space.kv:insert{json.encode(body['key']), json.encode(body['value'])}
+                        function() 
+                            box.space.kv:insert{key, json.encode(body['value'])}
                         end
                 )
                 if keyInserted then
                     return{status = 202,  headers = {
-                        ['Location'] = '/kv/' .. json.encode(body['key'])},
+                        ['Location'] = '/kv/' .. key},
                     }
                 else
                     return{status = 409}
