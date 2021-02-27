@@ -1,6 +1,6 @@
 box.cfg{
-    log_format='json',
-    log='tarantool.txt',
+    --log_format='json',
+    --log='tarantool.txt',
     listen = 3000
 }
 
@@ -9,7 +9,6 @@ local http_server = require('http.server')
 local json = require('json')
 local console = require('console')
 
-console.start()
 
 port = 80;
 if arg[2] then
@@ -120,10 +119,4 @@ router:route({method = 'PUT', path = '/kv/.*'},
 
 httpd:set_router(router)
 httpd:start()
-
--- while true do
---     local command = io.stdin:read()
---     if command == 'exit' then
---         os.exit()
---     end
--- end
+console.start()
