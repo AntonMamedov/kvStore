@@ -1,6 +1,6 @@
 box.cfg{
-    --log_format='json',
-    --log='tarantool.txt',
+    log_format='json',
+    log='tarantool.txt',
     listen = 3000
 }
 
@@ -17,12 +17,6 @@ end
 local httpd = http_server.new(arg[1], port, {log_requests = true,log_errors = true})
 local router = http_router.new()
 
-
-router:route({method = 'GET', path = '/kv/end'},
-        function(request)
-            os.exit()
-        end
-)
 
 router:route({method = 'GET', path = '/kv/.*'},
         function(request)
@@ -72,12 +66,12 @@ router:route({method = 'POST', path = '/kv'},
             else
                 local keyInserted = pcall(
                         function()
-                            box.space.kv:insert{tostring(body['key']), json.encode(body['value'])}
+                            box.space.kv:insert{json.encode(body['key']), json.encode(body['value'])}
                         end
                 )
                 if keyInserted then
                     return{status = 202,  headers = {
-                        ['Location'] = '/kv/' .. body['key'] },
+                        ['Location'] = '/kv/' .. json.encode(body['key'])},
                     }
                 else
                     return{status = 409}
