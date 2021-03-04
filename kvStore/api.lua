@@ -1,20 +1,56 @@
-box.cfg{
-    log_format='json',
-    log='tarantool.txt',
-    listen = 3000
+function ParseCommandArgs()
+    local commandArgs = {}
+    for index, value in pairs(arg) do
+        if (index > 0) then
+            local agrument = string.split(value, "=", 2)
+            local key = agrument[1]
+            local value = agrument[2]
+            if key and value then
+                commandArgs[key] = value
+            end
+        end
+    end
+    return commandArgs
+end
+
+local argTable = {
+    ['-addr'] = '0.0.0.0',
+    ['-port'] = '80',
+    ['-log_format'] = 'json',
+    ['-log_path'] = 'kv_logs.json',
+    ['-listen'] = 3000,
 }
+
+local commandArgs = ParseCommandArgs()
+
+for key, value in pairs(commandArgs)do
+    argTable[key] = value
+end
+
+
+local work = pcall(function ()
+    box.cfg{
+        log_format = argTable['-log_format'],
+        log = argTable['-log_path'],
+        listen = argTable['-listen']
+    } 
+    end)
+
+if not work then
+    print("Один из следующих аргументов некорректен:\n-listen\n-log_path\n-log_format\nПередайте корреткное значение.")
+    os.exit()
+end
 
 local http_router = require('http.router')
 local http_server = require('http.server')
 local json = require('json')
 local console = require('console')
+local port = tonumber(argTable['-port'])
+local httpd = http_server.new(argTable['-addr'], tonumber(argTable['-port']), {
+    log_requests = true,
+    log_errors = true
+})
 
-
-port = 80;
-if arg[2] then
-    port = tonumber(arg[2])
-end
-local httpd = http_server.new(arg[1], port, {log_requests = true,log_errors = true})
 local router = http_router.new()
 
 
